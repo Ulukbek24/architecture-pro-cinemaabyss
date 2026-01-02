@@ -47,7 +47,7 @@ spec:
     spec:
       containers:
       - name: zookeeper
-        image: wurstmeister/zookeeper
+        image: zookeeper:3.8
         ports:
         - containerPort: 2181
           name: client
@@ -135,11 +135,11 @@ spec:
           name: kafka
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "200m"
-          limits:
             memory: "1Gi"
-            cpu: "1000m"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
         env:
         - name: KAFKA_ADVERTISED_LISTENERS
           value: PLAINTEXT://kafka:9092
@@ -157,6 +157,8 @@ spec:
           value: "1"
         - name: KAFKA_LOG_DIRS
           value: "/kafka/kafka-logs"
+        - name: KAFKA_HEAP_OPTS
+          value: "-Xmx1G -Xms1G"
         volumeMounts:
         - name: kafka-data
           mountPath: /kafka
