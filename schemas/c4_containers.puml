@@ -1,0 +1,87 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Кинобездна — To-Be архитектура (C4 Container Diagram)
+
+LAYOUT_TOP_DOWN()
+
+Person(user, "Пользователь", "Смотрит фильмы/сериалы, управляет профилем")
+
+System_Boundary(cinema, "Кинобездна") {
+
+    Container(apiGateway, "API Gateway", "Go / Node.js", "Единая точка вызова API для клиентов (мобильные, web, Smart TV)")
+
+    Container(auth, "Auth Service", "Go", "Аутентификация/авторизация, JWT, профили, роли")
+    Container(userProfile, "User Profile Service", "Go", "Профиль, настройки, устройства, история входов")
+
+    Container(contentCatalog, "Catalog Service", "Go", "Метаданные контента: фильмы, жанры, актеры, оценки, карточка контента")
+    Container(contentStorage, "Content Streaming Service", "Go", "Выдача ссылок на стрим, DRM/подписи, интеграция с CDN/S3")
+    Container(watchHistory, "Watch History Service", "Go", "История просмотров, прогресс, last watched")
+
+    Container(subscription, "Subscription Service", "Go", "Подписки, тарифы, статусы, пробные периоды")
+    Container(payments, "Payment Service", "Go", "Платежи, счета, интеграции с провайдерами")
+
+    Container(discounts, "Discount & Loyalty Service", "Go", "Скидки, промокоды, интеграции с маркетплейсами и партнёрами")
+    Container(favorites, "Favorites Service", "Go", "Избранное, подборки, папки пользователя")
+
+    Container(recommendationAdapter, "Recommendation Adapter", "Go", "ACL/антикоррупционный слой. Интеграция с внешней рекомендательной системой")
+    Container(notification, "Notification Service", "Go", "Push/email/SMS уведомления")
+    Container(analytics, "Analytics Service", "Go", "Сбор событий, отчёты, метрики")
+
+    ContainerQueue(kafka, "Kafka", "Kafka", "Шина событий для асинхронного взаимодействия микросервисов")
+
+    ContainerDb(authDb, "Auth DB", "PostgreSQL", "Пользователи, токены, сессии")
+    ContainerDb(userDb, "User DB", "PostgreSQL", "Профили, устройства, настройки")
+    ContainerDb(catalogDb, "Catalog DB", "PostgreSQL", "Фильмы, жанры, актёры, метаданные")
+    ContainerDb(subDb, "Subscription DB", "PostgreSQL", "Подписки, тарифы, статусы")
+    ContainerDb(payDb, "Payment DB", "PostgreSQL", "Платежи, счета, транзакции")
+    ContainerDb(favDb, "Favorites DB", "PostgreSQL", "Избранное, папки")
+    ContainerDb(historyDb, "WatchHistory DB", "PostgreSQL", "История просмотров, прогресс")
+    ContainerDb(discountDb, "Discount DB", "PostgreSQL", "Скидки, промокоды")
+    ContainerDb(analyticsDb, "Analytics DB", "ClickHouse/PostgreSQL", "Аналитические данные и агрегаты")
+
+    Container_Ext(paymentProvider, "Платёжная система", "External", "Провайдер платежей")
+    Container_Ext(recoSystem, "Внешняя рекомендательная система", "External", "Рекомендации контента")
+    Container_Ext(cdnS3, "CDN / S3", "External", "Хранение видео и доставка контента")
+    Container_Ext(partners, "Партнёры (маркетплейсы/лояльность)", "External", "Партнёрские интеграции")
+}
+
+Rel(user, apiGateway, "Использует", "HTTPS")
+
+Rel(apiGateway, auth, "Авторизация/проверка токена", "REST/gRPC")
+Rel(apiGateway, contentCatalog, "Запрос карточек контента, каталога", "REST/gRPC")
+Rel(apiGateway, contentStorage, "Получение ссылок на стрим", "REST/gRPC")
+Rel(apiGateway, favorites, "Избранное", "REST/gRPC")
+Rel(apiGateway, watchHistory, "История просмотров", "REST/gRPC")
+Rel(apiGateway, subscription, "Подписки и статусы", "REST/gRPC")
+Rel(apiGateway, discounts, "Скидки/промокоды", "REST/gRPC")
+Rel(apiGateway, userProfile, "Профиль/настройки", "REST/gRPC")
+
+Rel(auth, authDb, "CRUD", "SQL")
+Rel(userProfile, userDb, "CRUD", "SQL")
+Rel(contentCatalog, catalogDb, "CRUD", "SQL")
+Rel(subscription, subDb, "CRUD", "SQL")
+Rel(payments, payDb, "CRUD", "SQL")
+Rel(favorites, favDb, "CRUD", "SQL")
+Rel(watchHistory, historyDb, "CRUD", "SQL")
+Rel(discounts, discountDb, "CRUD", "SQL")
+Rel(analytics, analyticsDb, "Пишет агрегаты", "SQL")
+
+Rel(contentStorage, cdnS3, "Выдаёт ссылки/подписи, читает видео", "HTTPS")
+Rel(payments, paymentProvider, "Проводит транзакции", "HTTPS")
+Rel(discounts, partners, "Синхронизация скидок/лояльности", "HTTPS")
+
+Rel(recommendationAdapter, recoSystem, "Запрос рекомендаций, трансформация данных (ACL)", "HTTPS")
+Rel(apiGateway, recommendationAdapter, "Запрашивает рекомендации", "REST/gRPC")
+
+Rel(contentCatalog, kafka, "Публикует ContentUpdated", "Kafka topic")
+Rel(watchHistory, kafka, "Публикует WatchEvent", "Kafka topic")
+Rel(payments, kafka, "Публикует PaymentCompleted", "Kafka topic")
+Rel(subscription, kafka, "Публикует SubscriptionChanged", "Kafka topic")
+Rel(favorites, kafka, "Публикует FavoritesChanged", "Kafka topic")
+
+Rel(kafka, analytics, "Потребляет события", "Kafka topic")
+Rel(kafka, notification, "Потребляет события", "Kafka topic")
+Rel(kafka, recommendationAdapter, "Потребляет события для обучения/обновления", "Kafka topic")
+
+@enduml

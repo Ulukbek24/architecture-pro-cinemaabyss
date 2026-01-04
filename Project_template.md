@@ -2,10 +2,8 @@
 
 ## Задание 1
 
-1. Спроектируйте to be архитектуру КиноБездны, разделив всю систему на отдельные домены и организовав интеграционное взаимодействие и единую точку вызова сервисов.
-Результат представьте в виде контейнерной диаграммы в нотации С4.
-Добавьте ссылку на файл в этот шаблон
-[ссылка на файл](ссылка)
+
+[диграмма контейнеров c4](https://github.com/Ulukbek24/architecture-pro-cinemaabyss/tree/cinema/schemas/c4_containers.puml)
 
 
 ## Задание 2
@@ -57,7 +55,9 @@
     - Добавьте в docker-compose новый сервис, kafka там уже есть
 
 Необходимые тесты для проверки этого API вызываются при запуске npm run test:local из папки tests/postman 
-Приложите скриншот тестов и скриншот состояния топиков Kafka http://localhost:8090 
+Приложите скриншот тестов и скриншот состояния топиков Kafka http://localhost:8090
+
+[скриншоты](https://github.com/Ulukbek24/architecture-pro-cinemaabyss/tree/cinema/screenshots/)
 
 
 ## Задание 3
@@ -271,6 +271,12 @@ cat .docker/config.json | base64
   Часть тестов с health-чек упадет, но создание событий отработает.
   Откройте логи event-service и сделайте скриншот обработки событий
 
+[скриншоты кубера](https://github.com/Ulukbek24/architecture-pro-cinemaabyss/tree/cinema/screenshots/kube)
+
+[скриншоты топиков](https://github.com/Ulukbek24/architecture-pro-cinemaabyss/tree/cinema/screenshots/topics.png)
+
+[скриншоты тестов](https://github.com/Ulukbek24/architecture-pro-cinemaabyss/tree/cinema/screenshots/tests.png)
+
 #### Шаг 3
 Добавьте сюда скриншота вывода при вызове https://cinemaabyss.example.com/api/movies и  скриншот вывода event-service после вызова тестов.
 
@@ -349,6 +355,7 @@ minikube tunnel
 https://cinemaabyss.example.com/api/movies
 и приложите скриншот развертывания helm и вывода https://cinemaabyss.example.com/api/movies
 
+[скриншоты helm_charts](https://github.com/Ulukbek24/architecture-pro-cinemaabyss/tree/cinema/screenshots/helm)
 
 # Задание 5
 Компания планирует активно развиваться и для повышения надежности, безопасности, реализации сетевых паттернов типа Circuit Breaker и канареечного деплоя вам как архитектору необходимо развернуть istio и настроить circuit breaker для monolith и movies сервисов.
@@ -414,6 +421,8 @@ You can see 21 for the upstream_rq_pending_overflow value which means 21 calls s
 ```
 
 Приложите скриншот работы circuit breaker'а
+
+[скриншоты istio](https://github.com/Ulukbek24/architecture-pro-cinemaabyss/tree/cinema/screenshots/istio)
 
 Удаляем все
 ```bash
